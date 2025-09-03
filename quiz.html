@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android Interview Quiz - Slide Trắc Nghiệm</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 25px;
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 25px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .question-slide {
+            display: none;
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .question-slide.active {
+            display: block;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .question-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .category-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .options {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            margin-bottom: 12px;
+            padding: 18px 25px;
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .option:hover::before {
+            left: 100%;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+        }
+
+        .explanation {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border-radius: 15px;
+            border-left: 5px solid #2196f3;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .explanation h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .explanation p {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-container {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #e8f5e8, #f0f8ff);
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+
+        .final-score {
+            font-size: 2.5rem;
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .home-screen {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .home-screen h2 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .home-screen p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .topic-card {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(40, 167, 69, 0.3);
+        }
+
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+
+        .result-card h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .result-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="content">
+            <!-- Home Screen -->
+            <div id="homeScreen" class="home-screen">
+                <div class="header">
+                    <h1>🤖 Android Interview Quiz</h1>
+                    <p>Kiểm tra kiến thức Android Development của bạn</p>
+                </div>
+                
+                <h2>Chủ đề được bao gồm:</h2>
+                <div class="topics-grid">
+                    <div class="topic-card">
+                        <h3>🎯 Kotlin</h3>
+                        <p>Coroutines, Flow, OOP, Functions</p>
+                    </div>
+                    <div class="topic-card">
+                        <h3>📱 Android Core</h3>
+                        <p>Activity, Fragment, View, Intent</p>
+                    </div>
+                    <div class="topic-card">
+                        <h3>🏗️ Architecture</h3>
+                        <p>MVVM, MVP, Clean Architecture</p>
+                    </div>
+                    <div class="topic-card">
+                        <h3>💾 Data & Storage</h3>
+                        <p>Room, SharedPreferences, SQLite</p>
+                    </div>
+                    <div class="topic-card">
+                        <h3>🌐 Networking</h3>
+                        <p>Retrofit, OkHttp, REST APIs</p>
+                    </div>
+                    <div class="topic-card">
+                        <h3>⚡ Performance</h3>
+                        <p>Memory, Threading, Optimization</p>
+                    </div>
+                </div>
+                
+                <p><strong>50 câu hỏi</strong> từ repository Android Interview Questions của Amit Shekhar</p>
+                <button class="start-btn" onclick="startQuiz()">🚀 Bắt đầu Quiz</button>
+            </div>
+
+            <!-- Quiz Screen -->
+            <div id="quizScreen" style="display: none;">
+                <div class="header">
+                    <h1>🤖 Android Interview Quiz</h1>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Câu 1/50</div>
+                </div>
+
+                <div id="questionContainer">
+                    <!-- Questions will be inserted here -->
+                </div>
+
+                <div class="navigation">
+                    <button class="nav-btn" id="prevBtn" onclick="previousQuestion()" disabled>← Câu trước</button>
+                    <div id="currentScore" style="font-weight: bold; color: #667eea;"></div>
+                    <button class="nav-btn" id="nextBtn" onclick="nextQuestion()">Câu tiếp →</button>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" style="display: none;">
+                <div class="header">
+                    <h1>🎉 Kết quả Quiz</h1>
+                </div>
+                
+                <div class="score-container">
+                    <div class="final-score" id="finalScore"></div>
+                    <div class="results-summary" id="resultsSummary"></div>
+                    <p id="finalMessage" style="font-size: 1.2rem; color: #666; margin-top: 20px;"></p>
+                    <button class="start-btn" onclick="restartQuiz()">🔄 Làm lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data based on Android Interview Questions repository
+        const quizData = [
+            // Kotlin Questions
+            {
+                category: "Kotlin",
+                question: "Kotlin Coroutines là gì và tại sao nó hữu ích?",
+                options: [
+                    "Một thư viện để xử lý UI animations",
+                    "Một cách để viết asynchronous code một cách tuần tự và dễ đọc",
+                    "Một design pattern cho Android architecture",
+                    "Một tool để debug Android applications"
+                ],
+                correct: 1,
+                explanation: "Kotlin Coroutines là một library giúp viết asynchronous code một cách tuần tự, making it easier to handle background tasks without blocking the main thread."
+            },
+            {
+                category: "Kotlin",
+                question: "Sự khác biệt giữa 'launch' và 'async' trong Kotlin Coroutines là gì?",
+                options: [
+                    "Không có sự khác biệt nào",
+                    "launch trả về Job, async trả về Deferred và có thể return value",
+                    "async nhanh hơn launch",
+                    "launch chỉ dành cho UI operations"
+                ],
+                correct: 1,
+                explanation: "launch trả về Job và fire-and-forget, trong khi async trả về Deferred<T> cho phép bạn get kết quả trả về từ coroutine."
+            },
+            {
+                category: "Kotlin",
+                question: "lateinit và lazy trong Kotlin khác nhau như thế nào?",
+                options: [
+                    "Không có sự khác biệt",
+                    "lateinit cho var, lazy cho val và khởi tạo khi được truy cập lần đầu",
+                    "lazy nhanh hơn lateinit",
+                    "lateinit chỉ dùng cho primitive types"
+                ],
+                correct: 1,
+                explanation: "lateinit dùng với var properties và phải được khởi tạo trước khi sử dụng. lazy dùng với val properties và được khởi tạo lazily khi được truy cập lần đầu."
+            },
+            {
+                category: "Kotlin",
+                question: "Companion object trong Kotlin là gì?",
+                options: [
+                    "Một class bình thường",
+                    "Tương đương với static members trong Java",
+                    "Một interface đặc biệt",
+                    "Một annotation"
+                ],
+                correct: 1,
+                explanation: "Companion object cho phép định nghĩa members có thể được truy cập thông qua tên class, tương tự như static members trong Java."
+            },
+            {
+                category: "Kotlin",
+                question: "Extension functions trong Kotlin có ưu điểm gì?",
+                options: [
+                    "Giúp tăng performance",
+                    "Cho phép thêm functionality vào class mà không cần kế thừa",
+                    "Chỉ dùng để làm code đẹp hơn",
+                    "Thay thế hoàn toàn inheritance"
+                ],
+                correct: 1,
+                explanation: "Extension functions cho phép extend một class với new functionality mà không cần kế thừa từ class đó hay sử dụng design patterns như Decorator."
+            },
+
+            // Android Core Questions
+            {
+                category: "Android Core",
+                question: "Activity Lifecycle trong Android gồm những methods nào theo thứ tự?",
+                options: [
+                    "onCreate → onStart → onResume → onPause → onStop → onDestroy",
+                    "onStart → onCreate → onResume → onPause → onStop → onDestroy", 
+                    "onCreate → onResume → onStart → onPause → onStop → onDestroy",
+                    "onCreate → onStart → onStop → onResume → onPause → onDestroy"
+                ],
+                correct: 0,
+                explanation: "Activity lifecycle theo thứ tự: onCreate() → onStart() → onResume() → onPause() → onStop() → onDestroy(). Đây là flow chuẩn của một Activity."
+            },
+            {
+                category: "Android Core",
+                question: "Sự khác biệt giữa Fragment và Activity là gì?",
+                options: [
+                    "Fragment nhanh hơn Activity",
+                    "Fragment có thể reuse và combine, Activity là màn hình độc lập",
+                    "Fragment chỉ dùng cho tablet",
+                    "Không có sự khác biệt"
+                ],
+                correct: 1,
+                explanation: "Fragment là UI component có thể reuse và combine trong Activity. Activity là một màn hình hoàn chỉnh, Fragment là một phần của UI có thể được chia sẻ giữa nhiều Activities."
+            },
+            {
+                category: "Android Core",
+                question: "Khi nào chỉ có onDestroy() được gọi mà không có onPause() và onStop()?",
+                options: [
+                    "Khi app bị crash",
+                    "Khi finish() được gọi trong onCreate() trước super.onCreate()",
+                    "Khi device hết memory",
+                    "Điều này không thể xảy ra"
+                ],
+                correct: 1,
+                explanation: "Khi finish() được gọi trong onCreate() trước khi super.onCreate() được gọi, Activity sẽ được destroyed ngay lập tức mà không đi qua onStart(), onResume(), onPause(), onStop()."
+            },
+            {
+                category: "Android Core",
+                question: "Intent trong Android được sử dụng để làm gì?",
+                options: [
+                    "Chỉ để start Activities",
+                    "Để communicate giữa các components (Activity, Service, BroadcastReceiver)",
+                    "Để lưu trữ data",
+                    "Để manage memory"
+                ],
+                correct: 1,
+                explanation: "Intent là messaging object được sử dụng để request action từ app component khác. Có thể dùng để start Activities, Services, deliver broadcasts."
+            },
+            {
+                category: "Android Core",
+                question: "Sự khác biệt giữa Explicit và Implicit Intent là gì?",
+                options: [
+                    "Explicit nhanh hơn Implicit",
+                    "Explicit chỉ định component cụ thể, Implicit để system chọn component phù hợp",
+                    "Implicit an toàn hơn Explicit",
+                    "Chỉ khác về syntax"
+                ],
+                correct: 1,
+                explanation: "Explicit Intent chỉ định component cụ thể sẽ handle Intent. Implicit Intent không chỉ định component, để Android system tìm component phù hợp dựa trên Intent filters."
+            },
+
+            // Views and UI
+            {
+                category: "Android UI",
+                question: "RecyclerView cải thiện performance so với ListView như thế nào?",
+                options: [
+                    "RecyclerView có built-in animations",
+                    "RecyclerView có ViewHolder pattern bắt buộc và reuses Views efficiently",
+                    "RecyclerView sử dụng ít memory hơn",
+                    "RecyclerView load data nhanh hơn"
+                ],
+                correct: 1,
+                explanation: "RecyclerView enforces ViewHolder pattern, có flexible layout managers, built-in animations, và efficient view recycling mechanism, giúp cải thiện performance và memory usage."
+            },
+            {
+                category: "Android UI",
+                question: "DiffUtil trong RecyclerView được sử dụng để làm gì?",
+                options: [
+                    "Để tạo animations",
+                    "Để calculate sự khác biệt giữa two lists và update efficiently",
+                    "Để sort data",
+                    "Để filter data"
+                ],
+                correct: 1,
+                explanation: "DiffUtil tính toán differences giữa old và new data lists và chỉ update những items thay đổi, thay vì refresh toàn bộ RecyclerView."
+            },
+            {
+                category: "Android UI",
+                question: "ConstraintLayout có ưu điểm gì so với LinearLayout và RelativeLayout?",
+                options: [
+                    "Chỉ đơn giản hơn để code",
+                    "Flat hierarchy, better performance, flexible positioning",
+                    "Nhỏ gọn hơn",
+                    "Chỉ support modern Android versions"
+                ],
+                correct: 1,
+                explanation: "ConstraintLayout tạo flat view hierarchy, giảm nested layouts, cung cấp flexible positioning system và better performance for complex layouts."
+            },
+            {
+                category: "Android UI",
+                question: "Sự khác biệt giữa View.GONE và View.INVISIBLE là gì?",
+                options: [
+                    "GONE ẩn view nhưng vẫn chiếm space, INVISIBLE remove hoàn toàn",
+                    "GONE remove view khỏi layout, INVISIBLE ẩn nhưng vẫn chiếm space",
+                    "Không có sự khác biệt",
+                    "GONE nhanh hơn INVISIBLE"
+                ],
+                correct: 1,
+                explanation: "View.GONE remove view khỏi layout hoàn toàn (no space). View.INVISIBLE chỉ ẩn view nhưng vẫn chiếm space trong layout."
+            },
+
+            // Architecture
+            {
+                category: "Architecture",
+                question: "MVVM Architecture trong Android hoạt động như thế nào?",
+                options: [
+                    "Model-View-ViewModel: View observe ViewModel, ViewModel interact với Model",
+                    "Chỉ là một naming convention",
+                    "Model control View trực tiếp",
+                    "View manage tất cả business logic"
+                ],
+                correct: 0,
+                explanation: "MVVM tách biệt UI logic (View) khỏi business logic (ViewModel). View observe ViewModel thông qua data binding hoặc LiveData/StateFlow. ViewModel interact với Model để get/update data."
+            },
+            {
+                category: "Architecture",
+                question: "ViewModel trong Android có ưu điểm gì?",
+                options: [
+                    "Chỉ để organize code",
+                    "Survive configuration changes, separate business logic from UI",
+                    "Tăng performance của app",
+                    "Giảm app size"
+                ],
+                correct: 1,
+                explanation: "ViewModel survive configuration changes như screen rotation, tách biệt business logic khỏi UI components, và provide data cho UI trong lifecycle-aware cách."
+            },
+            {
+                category: "Architecture",
+                question: "Repository Pattern trong Android được sử dụng để làm gì?",
+                options: [
+                    "Chỉ để lưu trữ code",
+                    "Centralize data access logic, abstract data sources",
+                    "Để tạo database",
+                    "Để manage UI state"
+                ],
+                correct: 1,
+                explanation: "Repository Pattern centralize data access logic, abstract các data sources (network, database, cache), và provide clean API cho ViewModels để access data."
+            },
+
+            // Data & Storage
+            {
+                category: "Data Storage",
+                question: "Room Database trong Android có ưu điểm gì so với raw SQLite?",
+                options: [
+                    "Room nhanh hơn SQLite",
+                    "Compile-time verification, type safety, integration với LiveData/Flow",
+                    "Room sử dụng ít memory hơn",
+                    "Room không cần SQL"
+                ],
+                correct: 1,
+                explanation: "Room provide compile-time verification of SQL queries, type safety, easy integration với LiveData/Flow, và reduces boilerplate code so với raw SQLite."
+            },
+            {
+                category: "Data Storage",
+                question: "Sự khác biệt giữa commit() và apply() trong SharedPreferences là gì?",
+                options: [
+                    "commit() async, apply() sync",
+                    "commit() sync và return boolean, apply() async và void",
+                    "Không có sự khác biệt",
+                    "apply() nhanh hơn commit() trong mọi trường hợp"
+                ],
+                correct: 1,
+                explanation: "commit() write data synchronously và return boolean success/failure. apply() write data asynchronously và không return value, usually preferred for better performance."
+            },
+            {
+                category: "Data Storage",
+                question: "Parcelable và Serializable trong Android khác nhau như thế nào?",
+                options: [
+                    "Parcelable slower but platform-independent",
+                    "Parcelable faster và Android-optimized, Serializable slower nhưng platform-independent",
+                    "Chỉ khác về syntax",
+                    "Serializable mới hơn Parcelable"
+                ],
+                correct: 1,
+                explanation: "Parcelable được optimize cho Android platform và faster. Serializable slower nhưng platform-independent và easier to implement."
+            },
+
+            // Networking
+            {
+                category: "Networking",
+                question: "OkHttp Interceptor trong Android được sử dụng để làm gì?",
+                options: [
+                    "Chỉ để log network requests",
+                    "Intercept, modify requests/responses, add headers, authentication, caching",
+                    "Để tăng network speed",
+                    "Để encrypt data"
+                ],
+                correct: 1,
+                explanation: "OkHttp Interceptors cho phép intercept và modify HTTP requests và responses. Có thể dùng cho logging, authentication, caching, error handling."
+            },
+            {
+                category: "Networking",
+                question: "Retrofit trong Android hoạt động như thế nào?",
+                options: [
+                    "Chỉ là một HTTP client",
+                    "Type-safe HTTP client, convert API interfaces thành HTTP calls",
+                    "Chỉ dùng để parse JSON",
+                    "Replace hoàn toàn OkHttp"
+                ],
+                correct: 1,
+                explanation: "Retrofit là type-safe HTTP client convert Java/Kotlin interfaces thành HTTP calls. Nó sử dụng annotations để describe HTTP request và automatically serialize/deserialize data."
+            },
+            {
+                category: "Networking",
+                question: "Làm thế nào để handle multiple network calls song song trong Android?",
+                options: [
+                    "Chỉ có thể làm tuần tự",
+                    "Sử dụng async/await trong Coroutines hoặc Zip operator trong RxJava",
+                    "Chỉ dùng AsyncTask",
+                    "Không thể thực hiện"
+                ],
+                correct: 1,
+                explanation: "Có thể sử dụng async/await trong Kotlin Coroutines hoặc Zip operator trong RxJava để thực hiện multiple network calls song song và combine results."
+            },
+
+            // Performance & Memory
+            {
+                category: "Performance",
+                question: "Memory leak trong Android thường xảy ra khi nào?",
+                options: [
+                    "Khi app sử dụng quá nhiều CPU",
+                    "Context references, static references, listeners không được unregister",
+                    "Khi có quá nhiều Activities",
+                    "Khi sử dụng RecyclerView"
+                ],
+                correct: 1,
+                explanation: "Memory leaks thường do holding references to Context, static references to Activities/Fragments, không unregister listeners/observers, hoặc anonymous inner classes."
+            },
+            {
+                category: "Performance",
+                question: "ANR (Application Not Responding) xảy ra khi nào?",
+                options: [
+                    "Khi app crash",
+                    "Khi main thread bị block quá 5 giây (Activity) hoặc 10 giây (BroadcastReceiver)",
+                    "Khi memory hết",
+                    "Khi network chậm"
+                ],
+                correct: 1,
+                explanation: "ANR xảy ra khi main thread bị block quá 5 giây cho Activities hoặc 10 giây cho BroadcastReceivers. Cần move heavy operations ra background threads."
+            },
+            {
+                category: "Performance",
+                question: "Làm thế nào để handle large bitmaps trong Android?",
+                options: [
+                    "Load full bitmap vào memory",
+                    "Sử dụng BitmapFactory.Options để decode với inSampleSize, hoặc dùng Glide/Picasso",
+                    "Convert sang Base64",
+                    "Không thể handle được"
+                ],
+                correct: 1,
+                explanation: "Sử dụng BitmapFactory.Options với inSampleSize để load scaled-down version, hoặc sử dụng image loading libraries như Glide, Picasso có built-in memory management."
+            },
+
+            // Threading & Concurrency
+            {
+                category: "Threading",
+                question: "Sự khác biệt giữa Thread và Runnable trong Android là gì?",
+                options: [
+                    "Không có sự khác biệt",
+                    "Thread là class, Runnable là interface. Runnable preferred cho flexibility",
+                    "Thread nhanh hơn Runnable",
+                    "Runnable chỉ dùng cho UI operations"
+                ],
+                correct: 1,
+                explanation: "Thread là class, Runnable là interface. Implement Runnable preferred vì cho phép class extend từ class khác và more flexible for thread pool usage."
+            },
+            {
+                category: "Threading",
+                question: "Handler và Looper trong Android hoạt động như thế nào?",
+                options: [
+                    "Chỉ dùng để update UI",
+                    "Handler post messages/runnables to MessageQueue, Looper process chúng on specific thread",
+                    "Chỉ dùng trong main thread",
+                    "Thay thế cho Thread"
+                ],
+                correct: 1,
+                explanation: "Handler post messages/runnables vào MessageQueue. Looper continuously poll MessageQueue và process messages on thread mà nó belongs to."
+            },
+            {
+                category: "Threading",
+                question: "Dispatchers trong Kotlin Coroutines có những loại nào?",
+                options: [
+                    "Chỉ có Main và IO",
+                    "Main (UI), IO (network/disk), Default (CPU-intensive), Unconfined",
+                    "Chỉ có Background và Foreground",
+                    "Chỉ có một loại dispatcher"
+                ],
+                correct: 1,
+                explanation: "Các Dispatchers chính: Main (UI operations), IO (network/disk operations), Default (CPU-intensive tasks), Unconfined (không confined to specific thread)."
+            },
+
+            // Services & Background Processing
+            {
+                category: "Services",
+                question: "Sự khác biệt giữa Service và IntentService là gì?",
+                options: [
+                    "IntentService nhanh hơn Service",
+                    "Service runs on main thread, IntentService runs on background thread và auto-stop",
+                    "Không có sự khác biệt",
+                    "IntentService chỉ dùng cho network"
+                ],
+                correct: 1,
+                explanation: "Service runs on main thread by default. IntentService runs on background worker thread, handles requests sequentially, và automatically stops khi work complete."
+            },
+            {
+                category: "Services",
+                question: "Foreground Service trong Android được sử dụng khi nào?",
+                options: [
+                    "Khi cần UI interaction",
+                    "Khi cần long-running operations mà user should be aware of",
+                    "Chỉ cho music apps",
+                    "Khi app không visible"
+                ],
+                correct: 1,
+                explanation: "Foreground Service dùng cho long-running operations mà user should be aware of (như music playback, file download). Must show ongoing notification."
+            },
+            {
+                category: "Services",
+                question: "WorkManager trong Android có ưu điểm gì?",
+                options: [
+                    "Chỉ đơn giản hơn AsyncTask",
+                    "Guaranteed execution, battery optimization, constraint-based scheduling",
+                    "Chỉ dùng cho one-time tasks",
+                    "Thay thế hoàn toàn Services"
+                ],
+                correct: 1,
+                explanation: "WorkManager guarantee task execution even sau khi app killed, có battery optimization, support constraints (network, charging), và work chaining."
+            },
+
+            // Testing
+            {
+                category: "Testing",
+                question: "Sự khác biệt giữa Unit Test và Instrumented Test trong Android là gì?",
+                options: [
+                    "Unit Test nhanh hơn Instrumented Test",
+                    "Unit Test runs on JVM, Instrumented Test runs on Android device/emulator",
+                    "Chỉ khác về naming convention",
+                    "Instrumented Test không cần device"
+                ],
+                correct: 1,
+                explanation: "Unit Tests run on local JVM (nhanh, không cần Android framework). Instrumented Tests run on Android device/emulator (có access to Android APIs)."
+            },
+            {
+                category: "Testing",
+                question: "Mockito trong Android testing được sử dụng để làm gì?",
+                options: [
+                    "Chỉ để test UI",
+                    "Create mock objects để isolate code under test",
+                    "Để run tests nhanh hơn",
+                    "Thay thế cho JUnit"
+                ],
+                correct: 1,
+                explanation: "Mockito create mock objects, cho phép isolate code under test bằng cách mock dependencies và verify interactions."
+            },
+
+            // Libraries & Dependencies
+            {
+                category: "Libraries",
+                question: "Dagger trong Android được sử dụng để làm gì?",
+                options: [
+                    "Để tạo UI components",
+                    "Dependency Injection framework để manage object creation và dependencies",
+                    "Để handle network requests",
+                    "Để manage database"
+                ],
+                correct: 1,
+                explanation: "Dagger là compile-time dependency injection framework giúp manage object creation, resolve dependencies, và improve testability."
+            },
+            {
+                category: "Libraries",
+                question: "RxJava trong Android development có ưu điểm gì?",
+                options: [
+                    "Chỉ để handle network",
+                    "Reactive programming, handle asynchronous data streams với operators",
+                    "Thay thế cho Kotlin Coroutines",
+                    "Chỉ dùng cho complex apps"
+                ],
+                correct: 1,
+                explanation: "RxJava provide reactive programming model với rich set of operators để compose và transform asynchronous data streams."
+            },
+            {
+                category: "Libraries",
+                question: "Glide image loading library hoạt động như thế nào?",
+                options: [
+                    "Chỉ load images từ internet",
+                    "Automatic memory management, caching, image transformations",
+                    "Chỉ dùng cho RecyclerView",
+                    "Thay thế cho ImageView"
+                ],
+                correct: 1,
+                explanation: "Glide provide automatic memory management, multi-level caching (memory/disk), image transformations, và efficient loading from various sources."
+            },
+
+            // Build System & Tools
+            {
+                category: "Build System",
+                question: "Gradle trong Android development được sử dụng để làm gì?",
+                options: [
+                    "Chỉ để compile code",
+                    "Build automation tool: compile, package, manage dependencies, run tasks",
+                    "Chỉ để manage dependencies",
+                    "IDE component"
+                ],
+                correct: 1,
+                explanation: "Gradle là build automation tool handle compilation, packaging, dependency management, custom tasks, build variants, và deployment."
+            },
+            {
+                category: "Build System",
+                question: "ProGuard trong Android được sử dụng để làm gì?",
+                options: [
+                    "Chỉ để debug apps",
+                    "Code obfuscation, shrinking, optimization để reduce APK size",
+                    "Để test performance",
+                    "Để manage permissions"
+                ],
+                correct: 1,
+                explanation: "ProGuard shrinks, optimizes, và obfuscates code bằng cách remove unused code/resources và rename classes/methods để reduce APK size."
+            },
+            {
+                category: "Build System",
+                question: "Build Variants trong Android là gì?",
+                options: [
+                    "Different versions của app",
+                    "Combination của Build Types và Product Flavors để tạo different app versions",
+                    "Chỉ để debug và release",
+                    "Different UI themes"
+                ],
+                correct: 1,
+                explanation: "Build Variants là combination của Build Types (debug/release) và Product Flavors để create different versions của app với different configurations."
+            },
+
+            // Security & Permissions
+            {
+                category: "Security",
+                question: "Runtime Permissions trong Android hoạt động như thế nao?",
+                options: [
+                    "Tự động granted cho all permissions",
+                    "User grant permissions at runtime cho dangerous permissions (API 23+)",
+                    "Chỉ cần khai báo trong manifest",
+                    "Không cần permissions"
+                ],
+                correct: 1,
+                explanation: "Từ API 23+, dangerous permissions phải request at runtime. User có thể grant/deny individual permissions khi app đang chạy."
+            },
+            {
+                category: "Security",
+                question: "Làm thế nào để secure API keys trong Android app?",
+                options: [
+                    "Hardcode trong source code",
+                    "Store trong NDK, use build configs, hoặc server-side proxy",
+                    "Store trong SharedPreferences",
+                    "Không thể secure được"
+                ],
+                correct: 1,
+                explanation: "Best practices: store trong NDK (harder to extract), use build configs với environment variables, hoặc implement server-side proxy để hide keys."
+            },
+
+            // Advanced Topics
+            {
+                category: "Advanced",
+                question: "Custom View trong Android được tạo như thế nào?",
+                options: [
+                    "Chỉ có thể extend existing Views",
+                    "Extend View/ViewGroup và override onDraw(), onMeasure(), onLayout()",
+                    "Sử dụng XML only",
+                    "Không thể tạo custom views"
+                ],
+                correct: 1,
+                explanation: "Custom View tạo bằng cách extend View hoặc ViewGroup và override key methods như onDraw(), onMeasure(), onLayout() để implement custom behavior."
+            },
+            {
+                category: "Advanced",
+                question: "Content Provider trong Android được sử dụng để làm gì?",
+                options: [
+                    "Chỉ để access system data",
+                    "Share data between applications securely với standardized interface",
+                    "Chỉ dùng cho database",
+                    "Thay thế cho SharedPreferences"
+                ],
+                correct: 1,
+                explanation: "Content Provider provide standardized interface để share data between applications, với built-in security và permission system."
+            },
+            {
+                category: "Advanced",
+                question: "Jetpack Compose so với traditional View system có ưu điểm gì?",
+                options: [
+                    "Chỉ đơn giản hơn",
+                    "Declarative UI, less boilerplate, better state management, modern toolkit",
+                    "Chỉ support modern devices",
+                    "Không có ưu điểm đặc biệt"
+                ],
+                correct: 1,
+                explanation: "Compose provide declarative UI paradigm, significantly less boilerplate code, better state management, và modern reactive approach to UI development."
+            },
+
+            // System Design
+            {
+                category: "System Design",
+                question: "Offline-first app architecture được design như thế nào?",
+                options: [
+                    "Chỉ cần cache data",
+                    "Local database as single source of truth, sync with server, conflict resolution",
+                    "Chỉ work khi có internet",
+                    "Không thể implement"
+                ],
+                correct: 1,
+                explanation: "Offline-first architecture sử dụng local database làm single source of truth, implement sync strategies, conflict resolution, và graceful degradation."
+            },
+            {
+                category: "System Design",
+                question: "Real-time updates trong Android app có thể implement như thế nào?",
+                options: [
+                    "Chỉ có thể polling",
+                    "WebSockets, Server-Sent Events, Firebase Realtime Database, Push Notifications",
+                    "Chỉ dùng REST API",
+                    "Không thể implement real-time"
+                ],
+                correct: 1,
+                explanation: "Có nhiều options: WebSockets (bidirectional), Server-Sent Events (unidirectional), Firebase Realtime Database, FCM Push Notifications."
+            }
+        ];
+
+        // Quiz state
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answers = [];
+        let quizStarted = false;
+
+        function startQuiz() {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            quizStarted = true;
+            currentQuestionIndex = 0;
+            score = 0;
+            answers = [];
+            showQuestion();
+            updateProgress();
+        }
+
+        function showQuestion() {
+            const question = quizData[currentQuestionIndex];
+            const container = document.getElementById('questionContainer');
+            
+            container.innerHTML = `
+                <div class="question-slide active">
+                    <div class="question-header">
+                        <div class="question-number">Câu ${currentQuestionIndex + 1}/50</div>
+                        <div class="category-badge">${question.category}</div>
+                    </div>
+                    <div class="question-text">${question.question}</div>
+                    <ul class="options" id="options">
+                        ${question.options.map((option, index) => 
+                            `<li class="option" onclick="selectAnswer(${index})" data-index="${index}">
+                                ${String.fromCharCode(65 + index)}. ${option}
+                            </li>`
+                        ).join('')}
+                    </ul>
+                    <div class="explanation" id="explanation">
+                        <h4>💡 Giải thích:</h4>
+                        <p>${question.explanation}</p>
+                    </div>
+                </div>
+            `;
+
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            document.getElementById('nextBtn').textContent = 
+                currentQuestionIndex === quizData.length - 1 ? 'Hoàn thành 🎯' : 'Câu tiếp →';
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = quizData[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            const explanation = document.getElementById('explanation');
+
+            // Clear previous selections
+            options.forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            // Mark selected answer
+            options[selectedIndex].classList.add('selected');
+
+            // Show correct answer and explanation
+            options[question.correct].classList.add('correct');
+            if (selectedIndex !== question.correct) {
+                options[selectedIndex].classList.add('incorrect');
+            }
+
+            // Show explanation
+            explanation.classList.add('show');
+
+            // Record answer
+            answers[currentQuestionIndex] = {
+                selected: selectedIndex,
+                correct: question.correct,
+                isCorrect: selectedIndex === question.correct
+            };
+
+            // Update score
+            if (selectedIndex === question.correct) {
+                if (!answers[currentQuestionIndex] || !answers[currentQuestionIndex].wasCorrect) {
+                    score++;
+                    answers[currentQuestionIndex].wasCorrect = true;
+                }
+            }
+
+            updateScore();
+
+            // Disable further clicks
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+            });
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+                updateProgress();
+                
+                // If answer was previously selected, show it
+                if (answers[currentQuestionIndex]) {
+                    const answer = answers[currentQuestionIndex];
+                    const options = document.querySelectorAll('.option');
+                    const explanation = document.getElementById('explanation');
+                    
+                    setTimeout(() => {
+                        options[answer.selected].classList.add('selected');
+                        options[quizData[currentQuestionIndex].correct].classList.add('correct');
+                        if (!answer.isCorrect) {
+                            options[answer.selected].classList.add('incorrect');
+                        }
+                        explanation.classList.add('show');
+                        
+                        options.forEach(option => {
+                            option.style.pointerEvents = 'none';
+                        });
+                    }, 100);
+                }
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+        }
+
+        function updateScore() {
+            const correctAnswers = answers.filter(answer => answer && answer.isCorrect).length;
+            document.getElementById('currentScore').textContent = `Điểm: ${correctAnswers}/${answers.length}`;
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+
+            const correctAnswers = answers.filter(answer => answer && answer.isCorrect).length;
+            const percentage = Math.round((correctAnswers / quizData.length) * 100);
+
+            document.getElementById('finalScore').textContent = `${correctAnswers}/${quizData.length} (${percentage}%)`;
+
+            // Create category breakdown
+            const categoryStats = {};
+            quizData.forEach((question, index) => {
+                if (!categoryStats[question.category]) {
+                    categoryStats[question.category] = { correct: 0, total: 0 };
+                }
+                categoryStats[question.category].total++;
+                if (answers[index] && answers[index].isCorrect) {
+                    categoryStats[question.category].correct++;
+                }
+            });
+
+            const summaryHTML = Object.keys(categoryStats).map(category => {
+                const stats = categoryStats[category];
+                const categoryPercentage = Math.round((stats.correct / stats.total) * 100);
+                return `
+                    <div class="result-card">
+                        <h3>${stats.correct}/${stats.total}</h3>
+                        <p>${category}</p>
+                        <small>${categoryPercentage}%</small>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('resultsSummary').innerHTML = summaryHTML;
+
+            // Show performance message
+            let message = '';
+            if (percentage >= 90) {
+                message = '🏆 Xuất sắc! Bạn có kiến thức Android rất vững vàng!';
+            } else if (percentage >= 80) {
+                message = '🎉 Tuyệt vời! Bạn có kiến thức Android tốt!';
+            } else if (percentage >= 70) {
+                message = '👍 Khá tốt! Còn một số điểm cần cải thiện.';
+            } else if (percentage >= 60) {
+                message = '📚 Cần học thêm! Hãy xem lại các tài liệu Android.';
+            } else {
+                message = '💪 Đừng nản lòng! Hãy bắt đầu học Android từ cơ bản.';
+            }
+
+            document.getElementById('finalMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'block';
+            currentQuestionIndex = 0;
+            score = 0;
+            answers = [];
+            quizStarted = false;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show home screen by default
+            document.getElementById('homeScreen').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
